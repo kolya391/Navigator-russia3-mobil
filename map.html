@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Навигатор</title>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=69c9b227-f5d3-4079-8eeb-7cf90a61006b&lang=ru_RU"></script>
+    <style>
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    let map;
+
+    function initMap() {
+        ymaps.ready(() => {
+            map = new ymaps.Map("map", {
+                center: [55.7558, 37.6173], // Москва
+                zoom: 10
+            });
+
+            window.mapLoaded = true;
+        });
+    }
+
+    function calculateRoute(start, end) {
+        if (!window.mapLoaded) {
+            alert("Карта еще не загружена. Пожалуйста, подождите.");
+            return;
+        }
+
+        ymaps.route([start, end], {
+            mapStateAutoApply: true
+        }).then(
+            (route) => {
+                map.geoObjects.add(route);
+
+                // Получаем расстояние и время
+                const distance = route.getLength(); // Расстояние в метрах
+                const duration = route.getTime(); // Время в секундах
+
+                // Преобразуем расстояние в километры
+                const distanceInKm = (distance / 1000).toFixed(2);
+
+                // Преобразуем время в часы и минуты
+                const hours = Math.floor(duration / 3600);
+                const minutes = Math.floor((duration % 3600) / 60);
+                const timeFormatted = `${hours} ч ${minutes} мин`;
+
+                // Возвращаем результат в Android
+                Android.showResult(distanceInKm, timeFormatted);
+            },
+            (error) => {
+                alert("Ошибка построения маршрута: " + error.message);
+            }
+        );
+    }
+
+    initMap();
+</script>
+</body>
+</html>
